@@ -1,5 +1,4 @@
 import streamlit as st
-import cv2
 from ultralytics import YOLO
 from PIL import Image
 import numpy as np
@@ -7,45 +6,38 @@ import numpy as np
 # Use caching to load the model only once
 @st.cache_resource
 def load_yolo_model():
-    model = YOLO("yolo11n.pt")
-    return model
+    # Use the lightweight nano model
+    return YOLO("yolo11n.pt")
 
-# --- App UI ---
 st.title("Hazi's YOLO AI Masterclass")
 st.write("Take a picture to see real-time object detection!")
 
-# Load the model from the cached function
 model = load_yolo_model()
 
-# Use Streamlit's built-in webcam input
-img_file_buffer = st.camera_input("Click the button below to take a picture")
+img_file_buffer = st.camera_input("Take a picture")
 
 if img_file_buffer is not None:
-    # Convert the file buffer to a PIL Image
+    # 1. Convert buffer to PIL Image
     img = Image.open(img_file_buffer)
     
-    # Convert PIL Image to a NumPy array (this is in RGB format)
+    # 2. Convert to Numpy (RGB)
     frame_rgb = np.array(img)
     
-    # FIX #2: Convert RGB to BGR for OpenCV and YOLO
+    # 3. YOLO expects BGR, so we swap R and B channels using Numpy
     frame_bgr = frame_rgb[:, :, ::-1] 
     
-    # --- Perform Inference ---
-    # Run YOLO on the BGR frame
+    # 4. Run YOLO
     results = model(frame_bgr)
     
-    # Use the .plot() method to get the annotated frame (returns a BGR image)
-    annotated_frame = results[0].plot()
+    # 5. Get annotated frame (Numpy array in BGR)
+    annotated_frame_bgr = results[0].plot()
     
-    # --- Display the results ---
-    # FIX #1 was caching the model. Now, display the output.
-    # We need to convert the BGR image back to RGB for Streamlit's st.image
-    annotated_frame_rgb = annotated_frame[:, :, ::-1]
+    # 6. Swap back to RGB for Streamlit display
+    annotated_frame_rgb = annotated_frame_bgr[:, :, ::-1]
     
-    st.image(annotated_frame_rgb, caption="Here are the detected objects!")
+    # 7. Show it
+    st.image(annotated_frame_rgb, caption="Detections")
 
-    # Optional: Display raw detection data
+    # Raw data output
     for box in results[0].boxes:
-        class_id = int(box.cls[0])
-        confidence = float(box.conf[0])
-        st.write(f"- Detected: **{model.names[class_id]}** with confidence {confidence:.2f}")
+        st.write(f"Detected: **{model.names[int(box.cls[0])]}** ({float(box.conf[0]):.2f})")
