@@ -28,7 +28,7 @@ if img_file_buffer is not None:
     frame_rgb = np.array(img)
     
     # FIX #2: Convert RGB to BGR for OpenCV and YOLO
-    frame_bgr = cv2.cvtColor(frame_rgb, cv2.COLOR_RGB2BGR)
+    frame_bgr = frame_rgb[:, :, ::-1] 
     
     # --- Perform Inference ---
     # Run YOLO on the BGR frame
@@ -40,7 +40,7 @@ if img_file_buffer is not None:
     # --- Display the results ---
     # FIX #1 was caching the model. Now, display the output.
     # We need to convert the BGR image back to RGB for Streamlit's st.image
-    annotated_frame_rgb = cv2.cvtColor(annotated_frame, cv2.COLOR_BGR2RGB)
+    annotated_frame_rgb = annotated_frame[:, :, ::-1]
     
     st.image(annotated_frame_rgb, caption="Here are the detected objects!")
 
