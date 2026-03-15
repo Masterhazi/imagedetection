@@ -3,6 +3,5 @@ ultralytics
 opencv-python-headless
 torch
 torchvision
-numpy
 pillow
-pandas
+numpy
