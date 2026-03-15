@@ -7,7 +7,7 @@ import numpy as np
 # Use caching to load the model only once
 @st.cache_resource
 def load_yolo_model():
-    model = YOLO("yolov8n.pt")
+    model = YOLO("yolo11n.pt")
     return model
 
 # --- App UI ---
